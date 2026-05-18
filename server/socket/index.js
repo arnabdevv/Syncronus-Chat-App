@@ -12,10 +12,13 @@ const SOCKET_MAP = "socket_map"; // Redis HASH — userId → socketId
  */
 const userSocketMap = {};
 
+let ioInstance;
+export const getIO = () => ioInstance;
+
 export const getReceiverSocketId = (userId) => userSocketMap[userId];
 
 export const initSocket = (httpServer) => {
-  const io = new SocketIOServer(httpServer, {
+  ioInstance = new SocketIOServer(httpServer, {
     cors: {
       origin: process.env.ORIGIN,
       methods: ["GET", "POST"],
@@ -23,7 +26,7 @@ export const initSocket = (httpServer) => {
     },
   });
 
-  io.on("connection", async (socket) => {
+  ioInstance.on("connection", async (socket) => {
     const userId = socket.handshake.query.userId;
 
     if (!userId) {
@@ -49,11 +52,12 @@ export const initSocket = (httpServer) => {
 
     // Broadcast full online list to all clients
     const onlineUsers = await redis.smembers(ONLINE_SET);
-    io.emit("onlineUsers", onlineUsers);
+    ioInstance.emit("onlineUsers", onlineUsers);
 
     // ── sendMessage ──────────────────────────────────────────────────────────
     socket.on("sendMessage", async (message) => {
-      const { senderId, recipientId, content, messageType, fileUrl } = message;
+      const { _id, senderId, recipientId, content, messageType, fileUrl } =
+        message;
 
       if (!recipientId || !senderId) {
         socket.emit("error", {
@@ -65,20 +69,32 @@ export const initSocket = (httpServer) => {
       try {
         const recipientSocketId = getReceiverSocketId(recipientId);
 
-        // If the recipient is online, save as delivered straight away.
-        // No extra DB round-trip later.
-        const initialStatus = recipientSocketId ? "delivered" : "sent";
+        let savedMessage;
 
-        const savedMessage = await Message.create({
-          senderId,
-          recipientId,
-          messageType: messageType || "text",
-          content: content || null,
-          fileUrl: fileUrl || null,
-          timestamp: new Date(),
-          status: initialStatus,
-          deliveredAt: recipientSocketId ? new Date() : null,
-        });
+        if (_id) {
+          // File message already saved via REST upload — just fetch it
+          savedMessage = await Message.findByIdAndUpdate(
+            _id,
+            {
+              status: recipientSocketId ? "delivered" : "sent",
+              deliveredAt: recipientSocketId ? new Date() : null,
+            },
+            { new: true },
+          );
+        } else {
+          // Text message — create fresh
+          const initialStatus = recipientSocketId ? "delivered" : "sent";
+          savedMessage = await Message.create({
+            senderId,
+            recipientId,
+            messageType: messageType || "text",
+            content: content || null,
+            fileUrl: fileUrl || null,
+            timestamp: new Date(),
+            status: initialStatus,
+            deliveredAt: recipientSocketId ? new Date() : null,
+          });
+        }
 
         const payload = {
           _id: savedMessage._id,
@@ -91,17 +107,16 @@ export const initSocket = (httpServer) => {
           status: savedMessage.status,
         };
 
-        // ── Deliver to recipient ─────────────────────────────────────────────
         if (recipientSocketId) {
-          io.to(recipientSocketId).emit("receiveMessage", payload);
+          ioInstance.to(recipientSocketId).emit("receiveMessage", payload);
         }
 
-        // ── Echo back to sender (replaces the optimistic message on client) ──
-        // Always send — this is what renders the message on the sender's screen
-        // with a real _id and the correct initial status tick.
-        socket.emit("receiveMessage", payload);
+        // Only echo text messages back to sender — file messages are added
+        // directly by addMessage() in the client after the REST upload
+        if (!_id) {
+          socket.emit("receiveMessage", payload);
+        }
 
-        // ── If delivered, tell the sender's UI to show double grey tick ──────
         if (recipientSocketId) {
           socket.emit("messageStatusUpdate", {
             messageId: savedMessage._id,
@@ -109,9 +124,8 @@ export const initSocket = (httpServer) => {
           });
         }
 
-        // ── Sidebar refresh for both sides ───────────────────────────────────
         if (recipientSocketId) {
-          io.to(recipientSocketId).emit("refreshDMList", payload);
+          ioInstance.to(recipientSocketId).emit("refreshDMList", payload);
         }
         socket.emit("refreshDMList", payload);
       } catch (err) {
@@ -167,7 +181,7 @@ export const initSocket = (httpServer) => {
         // Step 3 — tell the sender's socket to flip those ticks to blue.
         const senderSocketId = getReceiverSocketId(otherUserId);
         if (senderSocketId) {
-          io.to(senderSocketId).emit("messageStatusUpdate", {
+          ioInstance.to(senderSocketId).emit("messageStatusUpdate", {
             messageIds,
             status: "read",
           });
@@ -197,9 +211,9 @@ export const initSocket = (httpServer) => {
 
       // Broadcast updated online list
       const onlineUsers = await redis.smembers(ONLINE_SET);
-      io.emit("onlineUsers", onlineUsers);
+      ioInstance.emit("onlineUsers", onlineUsers);
     });
   });
 
-  return io;
+  return ioInstance;
 };

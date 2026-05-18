@@ -17,7 +17,9 @@ export const signup = async (request, response, next) => {
 
     const existing = await User.exists({ email });
     if (existing) {
-      return response.status(409).send("An account with this email already exists.");
+      return response
+        .status(409)
+        .send("An account with this email already exists.");
     }
 
     const user = await User.create({ email, password });
@@ -40,7 +42,9 @@ export const signup = async (request, response, next) => {
   } catch (error) {
     // MongoDB duplicate-key error — do NOT echo the email back
     if (error.code === 11000) {
-      return response.status(409).send("An account with this email already exists.");
+      return response
+        .status(409)
+        .send("An account with this email already exists.");
     }
     console.log({ error });
     return response.status(500).send("Internal Server Error");
@@ -62,6 +66,7 @@ export const login = async (request, response, next) => {
       maxAge,
       secure: true,
       sameSite: "None",
+      httpOnly: true,
     });
     return response.status(200).json({
       user: {

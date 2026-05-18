@@ -12,20 +12,23 @@ import { HOST, LOGOUT_ROUTE } from "@/utils/constants";
 import { FiEdit2 } from "react-icons/fi";
 import { IoPowerSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { useSocket } from "@/context/SocketContext";
 
 const ProfileInfo = () => {
   const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
+  const socket = useSocket();
 
   const logOut = async () => {
     try {
       const responce = await apiClient.post(
         LOGOUT_ROUTE,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (responce.status === 200) {
+        socket?.disconnect();
         navigate("/auth");
         setUserInfo(null);
       }
@@ -48,7 +51,7 @@ const ProfileInfo = () => {
             ) : (
               <div
                 className={`uppercase h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor(
-                  userInfo.color
+                  userInfo.color,
                 )}`}
               >
                 {userInfo.firstName

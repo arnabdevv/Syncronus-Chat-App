@@ -10,8 +10,13 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const socketRef = useRef(null);
-  const { userInfo, addMessage, setDmContacts, updateMessageStatus } =
-    useAppStore();
+  const {
+    userInfo,
+    addMessage,
+    setDmContacts,
+    updateMessageStatus,
+    setOnlineUsers,
+  } = useAppStore();
 
   useEffect(() => {
     // Only connect when the user is authenticated
@@ -40,6 +45,13 @@ export const SocketProvider = ({ children }) => {
         store.addMessage(message);
       }
     };
+
+    // ── Online presence ─────────────────────────────────────────────────────
+    const handleOnlineUsers = (users) => {
+      useAppStore.getState().setOnlineUsers(users);
+    };
+
+    socketRef.current.on("onlineUsers", handleOnlineUsers);
 
     socketRef.current.on("receiveMessage", handleReceiveMessage);
 
@@ -72,6 +84,7 @@ export const SocketProvider = ({ children }) => {
       socketRef.current?.off("refreshDMList", handleRefreshDMList);
       socketRef.current?.off("messageStatusUpdate", handleMessageStatusUpdate);
       socketRef.current?.disconnect();
+      socketRef.current?.off("onlineUsers", handleOnlineUsers);
     };
   }, [userInfo]);
 

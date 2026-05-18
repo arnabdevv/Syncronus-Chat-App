@@ -4,6 +4,8 @@ import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import { useSocket } from "@/context/SocketContext";
+import { apiClient } from "@/lib/api-client";
+import { UPLOAD_FILE_ROUTE } from "@/utils/constants";
 import { useAppStore } from "@/store";
 
 const MessageBar = () => {
@@ -11,7 +13,10 @@ const MessageBar = () => {
   const [message, setMessage] = useState("");
   const [emojiPicker, setEmojiPicker] = useState(false);
   const socket = useSocket();
-  const { userInfo, selectedChatData, selectedChatType } = useAppStore();
+  const { userInfo, selectedChatData, selectedChatType, addMessage } =
+    useAppStore();
+  const fileInputRef = useRef();
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     function handelClinkOutside(event) {
@@ -46,6 +51,46 @@ const MessageBar = () => {
     setEmojiPicker(false);
   };
 
+  const handelAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handelFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedChatData) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("recipientId", selectedChatData._id);
+
+    setUploading(true);
+    try {
+      const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData);
+
+      if (response.status === 201 && response.data.message) {
+        // Add to local message list immediately — no socket echo for file uploads
+        addMessage(response.data.message);
+
+        // Notify recipient via socket so their sidebar and message list update
+        if (socket) {
+          socket.emit("sendMessage", {
+            senderId: userInfo.id,
+            recipientId: selectedChatData._id,
+            messageType: "file",
+            fileUrl: response.data.message.fileUrl,
+            _id: response.data.message._id,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("[MessageBar] File upload failed:", error);
+    } finally {
+      setUploading(false);
+      // Reset input so the same file can be re-selected if needed
+      e.target.value = "";
+    }
+  };
+
   return (
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6">
       <div className="flex-1 flex bg-[#2a2b33] rounded-md items-center gap-5 pr-5">
@@ -62,9 +107,26 @@ const MessageBar = () => {
             }
           }}
         />
-        <button className=" text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all">
-          <GrAttachment className=" text-2xl" />
+        <button
+          className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"
+          onClick={handelAttachmentClick}
+          disabled={uploading}
+        >
+          {uploading ? (
+            <div className="w-5 h-5 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <GrAttachment className="text-2xl" />
+          )}
         </button>
+
+        {/* Hidden file input — triggered by the attachment button */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handelFileChange}
+          accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+        />
         <div className="relative">
           <button
             className=" text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"
