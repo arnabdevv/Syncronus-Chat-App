@@ -3,25 +3,29 @@ import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import { renameSync, unlinkSync } from "fs";
 
-const maxAge = 3 * 24 * 60 * 1000;
+const maxAge = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
 
 const createToken = (email, userId) => {
   return jwt.sign({ email, userId }, process.env.JWT_KEY, {
-    expiresIn: maxAge,
+    expiresIn: "3d", // explicit string — jsonwebtoken treats plain numbers as seconds, not ms
   });
 };
 
 export const signup = async (request, response, next) => {
   try {
     const { email, password } = request.body;
-    if (!email || !password) {
-      return response.status(400).send("Email ans Password is required.");
+
+    const existing = await User.exists({ email });
+    if (existing) {
+      return response.status(409).send("An account with this email already exists.");
     }
+
     const user = await User.create({ email, password });
     response.cookie("jwt", createToken(email, user.id), {
       maxAge,
       secure: true,
       sameSite: "None",
+      httpOnly: true,
     });
     return response.status(201).json({
       user: {
@@ -34,6 +38,10 @@ export const signup = async (request, response, next) => {
       },
     });
   } catch (error) {
+    // MongoDB duplicate-key error — do NOT echo the email back
+    if (error.code === 11000) {
+      return response.status(409).send("An account with this email already exists.");
+    }
     console.log({ error });
     return response.status(500).send("Internal Server Error");
   }
@@ -42,17 +50,14 @@ export const signup = async (request, response, next) => {
 export const login = async (request, response, next) => {
   try {
     const { email, password } = request.body;
-    if (!email || !password) {
-      return response.status(400).send("Email and Password is required.");
-    }
     const user = await User.findOne({ email });
     if (!user) {
       return response.status(404).send("Invalid Email");
     }
     const auth = await compare(password, user.password);
-    // if (!auth) {
-    //   return response.status(400).send("Invalid Password");
-    // }
+    if (!auth) {
+      return response.status(400).send("Invalid Password");
+    }
     response.cookie("jwt", createToken(email, user.id), {
       maxAge,
       secure: true,
@@ -101,11 +106,6 @@ export const updateProfile = async (request, response, next) => {
   try {
     const { userId } = request;
     const { firstName, lastName, color } = request.body;
-    if (!firstName || !lastName) {
-      return response
-        .status(400)
-        .send("First Name, Last Name and Color is required.");
-    }
 
     const userData = await User.findByIdAndUpdate(
       userId,
@@ -115,7 +115,7 @@ export const updateProfile = async (request, response, next) => {
         colors: color,
         profileSetup: true,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     return response.status(200).json({
@@ -146,7 +146,7 @@ export const addProfileImage = async (request, response, next) => {
     const updateUser = await User.findByIdAndUpdate(
       request.userId,
       { image: fileName },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     return response.status(200).json({

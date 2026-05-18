@@ -9,22 +9,28 @@ import {
   updateProfile,
 } from "../controllers/AuthController.js";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import {
+  signupSchema,
+  loginSchema,
+  updateProfileSchema,
+} from "../validators/authSchemas.js";
 import multer from "multer";
 
 const authRoutes = Router();
 const upload = multer({ dest: "uploads/profiles/" });
 
-authRoutes.post("/signup", signup);
-authRoutes.post("/login", login);
+authRoutes.post("/signup", validate(signupSchema), signup);
+authRoutes.post("/login", validate(loginSchema), login);
 authRoutes.get("/user-info", verifyToken, getUserInfo);
-authRoutes.post("/update-profile", verifyToken, updateProfile);
+authRoutes.post("/update-profile", verifyToken, validate(updateProfileSchema), updateProfile);
 authRoutes.post(
   "/add-profile-image",
   verifyToken,
   upload.single("profile-image"),
-  addProfileImage
+  addProfileImage,
 );
-authRoutes.delete("/remove-profile-ipmage", verifyToken, removeProfileImage);
+authRoutes.delete("/remove-profile-image", verifyToken, removeProfileImage);
 authRoutes.post("/logout", logOut);
 
 export default authRoutes;

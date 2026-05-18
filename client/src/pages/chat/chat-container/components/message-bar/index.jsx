@@ -3,11 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
+import { useSocket } from "@/context/SocketContext";
+import { useAppStore } from "@/store";
 
 const MessageBar = () => {
   const emojiRef = useRef();
   const [message, setMessage] = useState("");
   const [emojiPicker, setEmojiPicker] = useState(false);
+  const socket = useSocket();
+  const { userInfo, selectedChatData, selectedChatType } = useAppStore();
 
   useEffect(() => {
     function handelClinkOutside(event) {
@@ -25,7 +29,22 @@ const MessageBar = () => {
     setMessage((msg) => msg + emoji.emoji);
   };
 
-  const handelSendMessage = async () => {};
+  const handelSendMessage = async () => {
+    if (!message.trim()) return;
+    if (!socket || !selectedChatData) return;
+
+    const payload = {
+      senderId: userInfo.id,
+      recipientId: selectedChatData._id,
+      content: message,
+      messageType: "text",
+    };
+
+    socket.emit("sendMessage", payload);
+
+    setMessage("");
+    setEmojiPicker(false);
+  };
 
   return (
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6">
@@ -36,6 +55,12 @@ const MessageBar = () => {
           placeholder="Write Message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handelSendMessage();
+            }
+          }}
         />
         <button className=" text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all">
           <GrAttachment className=" text-2xl" />

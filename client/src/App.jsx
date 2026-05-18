@@ -7,6 +7,7 @@ import Profile from "./pages/profile";
 import { useAppStore } from "./store";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_INFO } from "./utils/constants";
+import { SocketProvider } from "./context/SocketContext";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -37,7 +38,10 @@ const App = () => {
         }
         console.log({ response });
       } catch (error) {
-        console.error({ error });
+        // 401 is expected — no cookie / not logged in. Silence it.
+        if (error?.response?.status !== 401) {
+          console.error("[App] Failed to fetch user info:", error);
+        }
         setUserInfo(undefined);
       } finally {
         setLoading(false);
@@ -55,35 +59,37 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/auth"
-          element={
-            <AuthRoute>
-              <Auth />
-            </AuthRoute>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <PrivateRoute>
-              <Chat />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/auth" />} />
-      </Routes>
-    </BrowserRouter>
+    <SocketProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/auth"
+            element={
+              <AuthRoute>
+                <Auth />
+              </AuthRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <Chat />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/auth" />} />
+        </Routes>
+      </BrowserRouter>
+    </SocketProvider>
   );
 };
 

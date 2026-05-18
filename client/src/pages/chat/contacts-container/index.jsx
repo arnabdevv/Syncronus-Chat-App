@@ -1,23 +1,234 @@
+import { useEffect } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAppStore } from "@/store";
+import { apiClient } from "@/lib/api-client";
+import { GET_DM_CONTACTS_ROUTE, HOST } from "@/utils/constants";
+import { getColor } from "@/lib/utils";
 import NewDM from "./components/new-dm";
 import ProfileInfo from "./components/profile-info";
 
-const ContactsContainer = () => {
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+const formatTime = (isoString) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+};
+
+// ── DMContactList ─────────────────────────────────────────────────────────────
+
+// ── SidebarTick ──────────────────────────────────────────────────────────────
+// Compact version of the message-bubble tick — shown next to the preview text.
+
+const SidebarTick = ({ status }) => {
+  if (status === "read") {
+    return (
+      <svg
+        width="16"
+        height="10"
+        viewBox="0 0 16 10"
+        fill="none"
+        className="flex-shrink-0"
+      >
+        <path
+          d="M1 5L4.5 8.5L10 1"
+          stroke="#53BDEB"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M5 5L8.5 8.5L14 1"
+          stroke="#53BDEB"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  if (status === "delivered") {
+    return (
+      <svg
+        width="16"
+        height="10"
+        viewBox="0 0 16 10"
+        fill="none"
+        className="flex-shrink-0"
+      >
+        <path
+          d="M1 5L4.5 8.5L10 1"
+          stroke="#8696A0"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M5 5L8.5 8.5L14 1"
+          stroke="#8696A0"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
   return (
-    <div className=" relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full">
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      className="flex-shrink-0"
+    >
+      <path
+        d="M1 5L4 8L9 1"
+        stroke="#8696A0"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+const DMContactList = () => {
+  const { dmContacts, setSelectedChatType, setSelectedChatData, userInfo } =
+    useAppStore();
+
+  if (!dmContacts.length) {
+    return (
+      <p className="text-center text-neutral-500 text-xs py-4">
+        No conversations yet. Start one with the + button above.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="flex flex-col gap-1 px-2">
+      {dmContacts.map((contact) => {
+        const initials =
+          contact.firstName && contact.lastName
+            ? `${contact.firstName[0]}${contact.lastName[0]}`.toUpperCase()
+            : (contact.email?.[0] ?? "?").toUpperCase();
+
+        const displayName =
+          contact.firstName && contact.lastName
+            ? `${contact.firstName} ${contact.lastName}`
+            : contact.email;
+
+        return (
+          <li key={contact._id}>
+            <button
+              onClick={() => {
+                setSelectedChatType("contact");
+                setSelectedChatData(contact);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#2f303b] transition-colors duration-150 text-left"
+            >
+              {/* Avatar */}
+              <Avatar className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+                {contact.image ? (
+                  <AvatarImage
+                    src={`${HOST}/${contact.image}`}
+                    alt={displayName}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <AvatarFallback
+                    className={`h-10 w-10 text-sm font-bold uppercase flex items-center justify-center rounded-full ${getColor(contact.colors)}`}
+                  >
+                    {initials}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+
+              {/* Name + timestamp */}
+              <div className="flex-1 min-w-0">
+                {/* Row 1: name + timestamp */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-white truncate">
+                    {displayName}
+                  </span>
+                  {contact.lastMessageTime && (
+                    <span className="text-[10px] text-neutral-500 flex-shrink-0">
+                      {formatTime(contact.lastMessageTime)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Row 2: tick + last message preview */}
+                {contact.lastMessageType && (
+                  <div className="flex items-center gap-1 mt-0.5 min-w-0">
+                    {/* Show tick only if the last message was sent by us */}
+                    {contact.lastMessageSenderId === userInfo?.id && (
+                      <SidebarTick status={contact.lastMessageStatus} />
+                    )}
+                    <p className="text-xs text-neutral-500 truncate">
+                      {contact.lastMessageType === "file"
+                        ? "📎 File"
+                        : contact.lastMessageContent}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+// ── ContactsContainer ─────────────────────────────────────────────────────────
+
+const ContactsContainer = () => {
+  const { setDmContacts } = useAppStore();
+
+  // Fetch DM contacts on mount
+  useEffect(() => {
+    const fetchDmContacts = async () => {
+      try {
+        const { data } = await apiClient.get(GET_DM_CONTACTS_ROUTE);
+        setDmContacts(data.contacts);
+      } catch (err) {
+        console.error(
+          "[ContactsContainer] Failed to load DM contacts:",
+          err.message,
+        );
+      }
+    };
+
+    fetchDmContacts();
+  }, [setDmContacts]);
+
+  return (
+    <div className="relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full flex flex-col">
       <div className="pt-3">
         <Logo />
       </div>
+
+      {/* Direct Messages section */}
       <div className="my-5">
-        <div className=" flex items-center justify-between pr-10  ">
+        <div className="flex items-center justify-between pr-10 mb-2">
           <Title text="Direct Messages" />
           <NewDM />
         </div>
+        <DMContactList />
       </div>
+
+      {/* Channels section */}
       <div className="my-5">
-        <div className=" flex items-center justify-between pr-10  ">
+        <div className="flex items-center justify-between pr-10">
           <Title text="Channels" />
         </div>
       </div>
+
       <ProfileInfo />
     </div>
   );
@@ -25,9 +236,11 @@ const ContactsContainer = () => {
 
 export default ContactsContainer;
 
+// ── Logo & Title ──────────────────────────────────────────────────────────────
+
 export const Logo = () => {
   return (
-    <div className="flex p-5  justify-start items-center gap-2">
+    <div className="flex p-5 justify-start items-center gap-2">
       <svg
         id="logo-38"
         width="78"
@@ -53,14 +266,14 @@ export const Logo = () => {
           fill="#a16ee8"
         ></path>{" "}
       </svg>
-      <span className="text-3xl font-semibold ">Syncronus</span>
+      <span className="text-3xl font-semibold">Syncronus</span>
     </div>
   );
 };
 
 const Title = ({ text }) => {
   return (
-    <h6 className=" uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm">
+    <h6 className="uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm">
       {text}
     </h6>
   );

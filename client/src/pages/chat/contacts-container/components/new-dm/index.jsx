@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { animationDefaultOptions, getColor } from "@/lib/utils";
 import Lottie from "react-lottie";
 import { apiClient } from "@/lib/api-client";
-import { HOST, SEARCH_CONTACTS_ROUTES } from "@/utils/constants";
+import { HOST, SEARCH_CONTACTS_ROUTE } from "@/utils/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAppStore } from "@/store";
@@ -32,9 +32,8 @@ const NewDM = () => {
     try {
       if (searchTerm.length > 0) {
         const response = await apiClient.post(
-          SEARCH_CONTACTS_ROUTES,
-          { searchTerm },
-          { withCredentials: true }
+          SEARCH_CONTACTS_ROUTE,
+          { searchTerm }
         );
         if (response.status === 200 && response.data.contacts) {
           setsearchedContacts(response.data.contacts);
