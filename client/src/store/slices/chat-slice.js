@@ -85,6 +85,17 @@ export const createChatSlice = (set, get) => ({
       };
     }),
 
+  markContactMessagesAsRead: (contactId) =>
+    set((state) => {
+      const updatedContacts = state.dmContacts.map((contact) =>
+        contact._id === contactId
+          ? { ...contact, lastMessageStatus: "read" }
+          : contact,
+      );
+
+      return { dmContacts: updatedContacts };
+    }),
+
   closeChat: () =>
     set({
       selectedChatData: undefined,

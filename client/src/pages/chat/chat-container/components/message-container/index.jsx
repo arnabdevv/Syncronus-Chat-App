@@ -14,6 +14,7 @@ const MessageContainer = () => {
     selectedChatMessages,
     setSelectedChatMessages,
     userInfo,
+    markContactMessagesAsRead,
   } = useAppStore();
 
   const scrollRef = useRef(null);
@@ -39,6 +40,8 @@ const MessageContainer = () => {
             socket.emit("markAsRead", {
               senderId: selectedChatData._id,
             });
+            // Update the local store so the sidebar tick and bold font reflect the read status instantly
+            markContactMessagesAsRead(selectedChatData._id);
           }
         }
       } catch (error) {

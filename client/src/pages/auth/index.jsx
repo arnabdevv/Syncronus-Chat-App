@@ -9,6 +9,7 @@ import { apiClient } from "@/lib/api-client";
 import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateLogin = () => {
     if (!email.length) {
@@ -46,36 +50,46 @@ const Auth = () => {
   };
 
   const handleLogin = async () => {
-    if (validateLogin) {
-      const response = await apiClient.post(
-        LOGIN_ROUTE,
-        { email, password },
-        { withCredentials: true }
-      );
-      if (response.data.user.id) {
-        setUserInfo(response.data.user);
-        if (response.data.user.profileSetup) {
-          navigate("/chat");
-        } else {
-          navigate("/profile");
+    if (validateLogin()) {
+      try {
+        const response = await apiClient.post(
+          LOGIN_ROUTE,
+          { email, password },
+          { withCredentials: true },
+        );
+        if (response.data.user.id) {
+          setUserInfo(response.data.user);
+          if (response.data.user.profileSetup) {
+            navigate("/chat");
+          } else {
+            navigate("/profile");
+          }
         }
+      } catch (error) {
+        const message =
+          error.response?.data || "Login failed. Please try again.";
+        toast.error(message);
       }
-      console.log({ response });
     }
   };
 
   const handleSignup = async () => {
     if (validateSignup()) {
-      const response = await apiClient.post(
-        SIGNUP_ROUTE,
-        { email, password },
-        { withCredentials: true }
-      );
-      if (response.status === 201) {
-        setUserInfo(response.data.user);
-        navigate("/profile");
+      try {
+        const response = await apiClient.post(
+          SIGNUP_ROUTE,
+          { email, password },
+          { withCredentials: true },
+        );
+        if (response.status === 201) {
+          setUserInfo(response.data.user);
+          navigate("/profile");
+        }
+      } catch (error) {
+        const message =
+          error.response?.data || "Signup failed. Please try again.";
+        toast.error(message);
       }
-      console.log(response);
     }
   };
 
@@ -116,13 +130,22 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="Password"
+                    type={showLoginPassword ? "text" : "password"}
+                    className="rounded-full p-6 pr-14"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  >
+                    {showLoginPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </button>
+                </div>
                 <Button className="rounded-full p-6" onClick={handleLogin}>
                   Login
                 </Button>
@@ -135,20 +158,38 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Input
-                  placeholder="Confirm Password"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="Password"
+                    type={showSignupPassword ? "text" : "password"}
+                    className="rounded-full p-6 pr-14"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
+                    onClick={() => setShowSignupPassword(!showSignupPassword)}
+                  >
+                    {showSignupPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <Input
+                    placeholder="Confirm Password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="rounded-full p-6 pr-14"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </button>
+                </div>
                 <Button className="rounded-full p-6" onClick={handleSignup}>
                   Signup
                 </Button>

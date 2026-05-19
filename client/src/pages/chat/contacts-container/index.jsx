@@ -122,6 +122,10 @@ const DMContactList = () => {
             ? `${contact.firstName} ${contact.lastName}`
             : contact.email;
 
+        const isUnread =
+          contact.lastMessageSenderId !== userInfo?.id &&
+          contact.lastMessageStatus !== "read";
+
         return (
           <li key={contact._id}>
             <button
@@ -169,7 +173,11 @@ const DMContactList = () => {
                     {contact.lastMessageSenderId === userInfo?.id && (
                       <SidebarTick status={contact.lastMessageStatus} />
                     )}
-                    <p className="text-xs text-neutral-500 truncate">
+                    <p
+                      className={`text-xs truncate ${
+                        isUnread ? "text-white font-bold" : "text-neutral-500"
+                      }`}
+                    >
                       {contact.lastMessageType === "file"
                         ? "📎 File"
                         : contact.lastMessageContent}
