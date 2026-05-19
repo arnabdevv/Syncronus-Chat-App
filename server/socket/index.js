@@ -21,8 +21,9 @@ export const initSocket = (httpServer) => {
   ioInstance = new SocketIOServer(httpServer, {
     cors: {
       origin: process.env.ORIGIN,
-      methods: ["GET", "POST"],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"],
     },
   });
 

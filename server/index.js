@@ -22,6 +22,7 @@ app.use(
     origin: process.env.ORIGIN, // Your frontend's origin (e.g., http://localhost:5173)
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true, // Allow cookies to be sent along with requests
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -38,7 +39,9 @@ app.get("/", (req, res) => {
 
 // Health check route
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
+  res
+    .status(200)
+    .json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
 });
 
 // Routes
