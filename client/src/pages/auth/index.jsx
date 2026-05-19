@@ -229,7 +229,7 @@ const Auth = () => {
           <img
             src={Background}
             alt="background login"
-            className="h-[700px] drop-shadow-2xl brightness-75"
+            className="h-[600px] drop-shadow-2xl brightness-75"
           />
         </div>
       </div>
