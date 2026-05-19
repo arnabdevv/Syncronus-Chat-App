@@ -64,10 +64,11 @@ export const getDMContacts = async (request, response, next) => {
             },
           },
           lastMessageTime: { $first: "$timestamp" },
-          lastMessageContent: { $first: "$content" }, // ← add this
-          lastMessageType: { $first: "$messageType" }, // ← add this
+          lastMessageContent: { $first: "$content" },
+          lastMessageType: { $first: "$messageType" },
           lastMessageSenderId: { $first: "$senderId" },
           lastMessageStatus: { $first: "$status" },
+          lastMessageId: { $first: "$_id" },
         },
       },
       // Step 4: Look up full user info for each contact
@@ -97,6 +98,7 @@ export const getDMContacts = async (request, response, next) => {
           color: "$contactInfo.colors",
           lastMessageSenderId: 1,
           lastMessageStatus: 1,
+          lastMessageId: 1,
         },
       },
       // Step 7: Newest conversation at the top

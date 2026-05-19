@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "@/context/SocketContext";
 
 const ProfileInfo = () => {
-  const { userInfo, setUserInfo } = useAppStore();
+  const { userInfo, setUserInfo, closeChat } = useAppStore();
   const navigate = useNavigate();
   const socket = useSocket();
 
@@ -29,6 +29,7 @@ const ProfileInfo = () => {
 
       if (responce.status === 200) {
         socket?.disconnect();
+        closeChat();
         navigate("/auth");
         setUserInfo(null);
       }

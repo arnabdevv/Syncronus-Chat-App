@@ -43,6 +43,7 @@ export const createChatSlice = (set, get) => ({
               lastMessageType: message.messageType ?? "text",
               lastMessageSenderId: message.senderId ?? null,
               lastMessageStatus: message.status ?? "sent",
+              lastMessageId: message._id ?? null,
             }
           : contact,
       );
@@ -60,17 +61,27 @@ export const createChatSlice = (set, get) => ({
   // bulk updates (read — array of IDs from markAsRead).
   updateMessageStatus: ({ messageId, messageIds, status }) =>
     set((state) => {
-      // Normalise: always work with an array of IDs
       const ids = new Set(
         messageIds
           ? messageIds.map((id) => id.toString())
           : [messageId.toString()],
       );
 
+      // Update ticks inside the open conversation
+      const updatedMessages = state.selectedChatMessages.map((msg) =>
+        ids.has(msg._id.toString()) ? { ...msg, status } : msg,
+      );
+
+      // Also update the sidebar tick if the contact's last message is among the updated IDs
+      const updatedContacts = state.dmContacts.map((contact) =>
+        contact.lastMessageId && ids.has(contact.lastMessageId.toString())
+          ? { ...contact, lastMessageStatus: status }
+          : contact,
+      );
+
       return {
-        selectedChatMessages: state.selectedChatMessages.map((msg) =>
-          ids.has(msg._id.toString()) ? { ...msg, status } : msg,
-        ),
+        selectedChatMessages: updatedMessages,
+        dmContacts: updatedContacts,
       };
     }),
 

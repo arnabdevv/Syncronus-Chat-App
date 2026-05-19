@@ -56,11 +56,11 @@ export const login = async (request, response, next) => {
     const { email, password } = request.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return response.status(404).send("Invalid Email");
+      return response.status(404).send("Invalid Email or Password");
     }
     const auth = await compare(password, user.password);
     if (!auth) {
-      return response.status(400).send("Invalid Password");
+      return response.status(400).send("Invalid Email or Password");
     }
     response.cookie("jwt", createToken(email, user.id), {
       maxAge,
