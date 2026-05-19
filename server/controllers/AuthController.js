@@ -1,4 +1,4 @@
-import { compare } from "bcrypt";
+import { compare } from "bcryptjs";
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import { renameSync, unlinkSync } from "fs";
