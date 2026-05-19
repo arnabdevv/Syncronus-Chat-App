@@ -109,14 +109,14 @@ const MessageContainer = () => {
           <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
             <path
               d="M1 5L4.5 8.5L10 1"
-              stroke="#53BDEB"
+              stroke="#8B5CF6"
               strokeWidth="1.6"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
               d="M5 5L8.5 8.5L14 1"
-              stroke="#53BDEB"
+              stroke="#8B5CF6"
               strokeWidth="1.6"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -178,8 +178,8 @@ const MessageContainer = () => {
         className={`max-w-[65%] px-4 py-2 rounded-2xl text-sm leading-relaxed
           break-words ${
             isMine(message)
-              ? "bg-[#8417ff] text-white rounded-br-sm"
-              : "bg-[#2a2b33] text-neutral-100 rounded-bl-sm"
+              ? "bg-electric-violet text-white rounded-br-sm neon-border shadow-[0_0_10px_rgba(139,92,246,0.2)]"
+              : "bg-white/5 backdrop-blur-md border border-white/10 text-neutral-100 rounded-bl-sm"
           }`}
       >
         {message.content}
@@ -210,8 +210,8 @@ const MessageContainer = () => {
         <div
           className={`max-w-[65%] rounded-2xl overflow-hidden text-sm ${
             isMine(message)
-              ? "bg-[#8417ff] text-white rounded-br-sm"
-              : "bg-[#2a2b33] text-neutral-100 rounded-bl-sm"
+              ? "bg-electric-violet text-white rounded-br-sm neon-border shadow-[0_0_10px_rgba(139,92,246,0.2)]"
+              : "bg-white/5 backdrop-blur-md border border-white/10 text-neutral-100 rounded-bl-sm"
           }`}
         >
           {isImage ? (
@@ -275,11 +275,11 @@ const MessageContainer = () => {
   // ── Date divider ──────────────────────────────────────────────────────────
   const DateDivider = ({ timestamp }) => (
     <div className="flex items-center gap-3 my-4">
-      <div className="flex-1 h-px bg-[#2f303b]" />
+      <div className="flex-1 h-px bg-white/10" />
       <span className="text-xs text-neutral-500 whitespace-nowrap">
         {formatDateDivider(timestamp)}
       </span>
-      <div className="flex-1 h-px bg-[#2f303b]" />
+      <div className="flex-1 h-px bg-white/10" />
     </div>
   );
 

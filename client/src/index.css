@@ -1,15 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
   :root {
-    --radius: 0.5rem
+    --radius: 0.5rem;
+  }
+  
+  body {
+    @apply bg-background text-white font-sans antialiased;
+    background-color: #0b1326;
   }
 }
 
-.poppins-medium {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: normal;
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg;
+}
+
+.neon-border {
+  @apply border border-electric-violet/50 shadow-[0_0_15px_rgba(139,92,246,0.3)];
 }

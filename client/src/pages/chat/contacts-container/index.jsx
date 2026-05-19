@@ -37,14 +37,14 @@ const SidebarTick = ({ status }) => {
       >
         <path
           d="M1 5L4.5 8.5L10 1"
-          stroke="#53BDEB"
+          stroke="#8B5CF6"
           strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
           d="M5 5L8.5 8.5L14 1"
-          stroke="#53BDEB"
+          stroke="#8B5CF6"
           strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -133,7 +133,7 @@ const DMContactList = () => {
                 setSelectedChatType("contact");
                 setSelectedChatData(contact);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#2f303b] transition-colors duration-150 text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors duration-150 text-left"
             >
               {/* Avatar */}
               <Avatar className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
@@ -216,7 +216,7 @@ const ContactsContainer = () => {
   }, [setDmContacts]);
 
   return (
-    <div className="relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full flex flex-col">
+    <div className="relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-surface-container/50 backdrop-blur-md border-r border-white/5 w-full flex flex-col z-10">
       <div className="pt-3">
         <Logo />
       </div>
@@ -261,17 +261,17 @@ export const Logo = () => {
         <path
           d="M55.5 0H77.5L58.5 32H36.5L55.5 0Z"
           className="ccustom"
-          fill="#8338ec"
+          fill="#8B5CF6"
         ></path>{" "}
         <path
           d="M35.5 0H51.5L32.5 32H16.5L35.5 0Z"
           className="ccompli1"
-          fill="#975aed"
+          fill="#6D3BD7"
         ></path>{" "}
         <path
           d="M19.5 0H31.5L12.5 32H0.5L19.5 0Z"
           className="ccompli2"
-          fill="#a16ee8"
+          fill="#4F46E5"
         ></path>{" "}
       </svg>
       <span className="text-3xl font-semibold">Syncronus</span>

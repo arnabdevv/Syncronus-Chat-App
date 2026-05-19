@@ -17,13 +17,19 @@ const Chat = () => {
   }, [userInfo, navigate]);
 
   return (
-    <div className=" flex h-[100vh] text-white overflow-hidden">
-      <ContactsContainer />
-      {selectedChatType === undefined ? (
-        <EmptyChatContainer />
-      ) : (
-        <ChatContainer />
-      )}
+    <div className="flex h-[100vh] text-white overflow-hidden bg-background relative">
+      {/* Background ambient glows */}
+      <div className="absolute top-0 left-0 w-[40vw] h-[40vw] bg-electric-violet/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-deep-indigo/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      
+      <div className="flex w-full h-full z-10 relative">
+        <ContactsContainer />
+        {selectedChatType === undefined ? (
+          <EmptyChatContainer />
+        ) : (
+          <ChatContainer />
+        )}
+      </div>
     </div>
   );
 };

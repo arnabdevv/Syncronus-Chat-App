@@ -148,6 +148,20 @@ export const addProfileImage = async (request, response, next) => {
     let fileName = "uploads/profiles/" + date + request.file.originalname;
     renameSync(request.file.path, fileName);
 
+    // ── Delete old image from disk before saving the new one ──────────────
+    const existingUser = await User.findById(request.userId);
+    if (existingUser?.image) {
+      try {
+        unlinkSync(existingUser.image);
+      } catch (unlinkErr) {
+        // File may have been manually deleted — log and continue
+        console.warn(
+          "[addProfileImage] Could not delete old image:",
+          unlinkErr.message,
+        );
+      }
+    }
+
     const updateUser = await User.findByIdAndUpdate(
       request.userId,
       { image: fileName },

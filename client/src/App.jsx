@@ -1,9 +1,9 @@
-import React, { Children, useEffect, useState } from "react";
-import { Button } from "./components/ui/button";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Auth from "./pages/auth";
 import Chat from "./pages/chat";
 import Profile from "./pages/profile";
+import Loading from "./pages/loading";
 import { useAppStore } from "./store";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_INFO } from "./utils/constants";
@@ -55,7 +55,7 @@ const App = () => {
   }, [userInfo, setUserInfo]);
 
   if (loading) {
-    return <div>Loading....</div>;
+    return <Loading />;
   }
 
   return (
