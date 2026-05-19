@@ -36,6 +36,11 @@ app.get("/", (req, res) => {
   res.send("Welcome to the server!");
 });
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", uptime: process.uptime(), timestamp: new Date() });
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactsRoutes);
