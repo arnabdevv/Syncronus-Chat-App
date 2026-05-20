@@ -31,6 +31,7 @@ export const signup = async (request, response, next) => {
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       httpOnly: true,
+      path: "/",
     });
     return response.status(201).json({
       user: {
@@ -72,6 +73,7 @@ export const login = async (request, response, next) => {
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       httpOnly: true,
+      path: "/",
     });
     return response.status(200).json({
       user: {
