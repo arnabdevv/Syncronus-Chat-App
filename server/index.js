@@ -26,6 +26,8 @@ app.use(
   }),
 );
 
+app.set("trust proxy", 1);
+
 app.use("/uploads/profiles", express.static("uploads/profiles"));
 app.use("/uploads/files", express.static("uploads/files"));
 
