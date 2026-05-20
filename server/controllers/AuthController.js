@@ -23,10 +23,12 @@ export const signup = async (request, response, next) => {
     }
 
     const user = await User.create({ email, password });
+
+    const isProduction = process.env.NODE_ENV === "production";
     response.cookie("jwt", createToken(email, user.id), {
       maxAge,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       httpOnly: true,
     });
     return response.status(201).json({
@@ -62,10 +64,11 @@ export const login = async (request, response, next) => {
     if (!auth) {
       return response.status(400).send("Invalid Email or Password");
     }
+    const isProduction = process.env.NODE_ENV === "production";
     response.cookie("jwt", createToken(email, user.id), {
       maxAge,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       httpOnly: true,
     });
     return response.status(200).json({
