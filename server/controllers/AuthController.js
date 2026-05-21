@@ -13,7 +13,7 @@ const createToken = (email, userId) => {
 
 export const signup = async (request, response, next) => {
   try {
-    const { email, password } = request.body;
+    const { email, password } = request.validated.body;
 
     const existing = await User.exists({ email });
     if (existing) {
@@ -24,16 +24,10 @@ export const signup = async (request, response, next) => {
 
     const user = await User.create({ email, password });
 
-    const isProduction = process.env.NODE_ENV === "production";
+    const token = createToken(email, user.id);
 
-    response.cookie("jwt", createToken(email, user.id), {
-      maxAge,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
-      httpOnly: true,
-      path: "/",
-    });
     return response.status(201).json({
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -57,7 +51,7 @@ export const signup = async (request, response, next) => {
 
 export const login = async (request, response, next) => {
   try {
-    const { email, password } = request.body;
+    const { email, password } = request.validated.body;
     const user = await User.findOne({ email });
     if (!user) {
       return response.status(404).send("Invalid Email or Password");
@@ -66,16 +60,11 @@ export const login = async (request, response, next) => {
     if (!auth) {
       return response.status(400).send("Invalid Email or Password");
     }
-    const isProduction = process.env.NODE_ENV === "production";
 
-    response.cookie("jwt", createToken(email, user.id), {
-      maxAge,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
-      httpOnly: true,
-      path: "/",
-    });
+    const token = createToken(email, user.id);
+
     return response.status(200).json({
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -117,7 +106,7 @@ export const getUserInfo = async (request, response, next) => {
 export const updateProfile = async (request, response, next) => {
   try {
     const { userId } = request;
-    const { firstName, lastName, color } = request.body;
+    const { firstName, lastName, color } = request.validated.body;
 
     const userData = await User.findByIdAndUpdate(
       userId,
@@ -209,12 +198,7 @@ export const removeProfileImage = async (request, response, next) => {
 
 export const logOut = async (request, response, next) => {
   try {
-    response.cookie("jwt", "", {
-      maxAge: 1,
-      secure: true,
-      sameSite: "None",
-      httpOnly: true,
-    });
+    // Token is stored on client-side, so just return success
     return response.status(200).send("Logout Successfull.");
   } catch (error) {
     console.log({ error });

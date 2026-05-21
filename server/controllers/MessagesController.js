@@ -10,7 +10,7 @@ import { getReceiverSocketId } from "../socket/index.js";
 export const getMessages = async (request, response, next) => {
   try {
     const myId = request.userId;
-    const { recipientId } = request.query;
+    const { recipientId } = request.validated.query;
 
     const messages = await Message.find({
       $or: [
@@ -37,7 +37,7 @@ export const uploadFile = async (request, response, next) => {
       return response.status(400).send("File is required.");
     }
 
-    const { recipientId } = request.body;
+    const { recipientId } = request.validated.body;
     const senderId = request.userId;
 
     // Move the temp file to the permanent uploads/files directory

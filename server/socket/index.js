@@ -22,7 +22,6 @@ export const initSocket = (httpServer) => {
     cors: {
       origin: process.env.ORIGIN,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"],
     },
   });

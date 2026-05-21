@@ -21,13 +21,10 @@ const ProfileInfo = () => {
 
   const logOut = async () => {
     try {
-      const responce = await apiClient.post(
-        LOGOUT_ROUTE,
-        {},
-        { withCredentials: true },
-      );
+      const responce = await apiClient.post(LOGOUT_ROUTE, {});
 
       if (responce.status === 200) {
+        localStorage.removeItem("token");
         socket?.disconnect();
         closeChat();
         navigate("/auth");

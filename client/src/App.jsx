@@ -28,9 +28,7 @@ const App = () => {
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const response = await apiClient.get(GET_USER_INFO, {
-          withCredentials: true,
-        });
+        const response = await apiClient.get(GET_USER_INFO);
         if (response.status === 200 && response.data.id) {
           setUserInfo(response.data);
         } else {
@@ -38,7 +36,7 @@ const App = () => {
         }
         console.log({ response });
       } catch (error) {
-        // 401 is expected — no cookie / not logged in. Silence it.
+        // 401 is expected — no token / not logged in. Silence it.
         if (error?.response?.status !== 401) {
           console.error("[App] Failed to fetch user info:", error);
         }

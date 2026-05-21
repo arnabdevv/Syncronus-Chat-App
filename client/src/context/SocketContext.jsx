@@ -23,7 +23,6 @@ export const SocketProvider = ({ children }) => {
     if (!userInfo) return;
 
     socketRef.current = io(HOST, {
-      withCredentials: true,
       query: { userId: userInfo.id },
     });
 

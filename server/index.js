@@ -1,7 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./routes/AuthRoutes.js";
 import contactsRoutes from "./routes/ContactRoutes.js";
@@ -21,7 +20,6 @@ app.use(
   cors({
     origin: process.env.ORIGIN, // Your frontend's origin (e.g., http://localhost:5173)
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true, // Allow cookies to be sent along with requests
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
@@ -31,8 +29,7 @@ app.set("trust proxy", 1);
 app.use("/uploads/profiles", express.static("uploads/profiles"));
 app.use("/uploads/files", express.static("uploads/files"));
 
-// Middleware for parsing cookies and JSON bodies
-app.use(cookieParser());
+// Middleware for parsing JSON bodies
 app.use(express.json());
 // Root route
 app.get("/", (req, res) => {

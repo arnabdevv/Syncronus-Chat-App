@@ -54,11 +54,11 @@ const Profile = () => {
   const saveChanges = async () => {
     if (validateProfile()) {
       try {
-        const response = await apiClient.post(
-          UPDATE_PROFILE_ROUTE,
-          { firstName, lastName, colors: selectedColor },
-          { withCredentials: true }
-        );
+        const response = await apiClient.post(UPDATE_PROFILE_ROUTE, {
+          firstName,
+          lastName,
+          colors: selectedColor,
+        });
         if (response.status === 200 && response.data) {
           setUserInfo({ ...response.data });
           toast.success("Profile Update Successfull");
@@ -88,9 +88,7 @@ const Profile = () => {
     if (file) {
       const formData = new FormData();
       formData.append("profile-image", file);
-      const response = await apiClient.post(ADD_PROFILE_IMAGE_ROUTE, formData, {
-        withCredentials: true,
-      });
+      const response = await apiClient.post(ADD_PROFILE_IMAGE_ROUTE, formData);
       if (response.status === 200 && response.data.image) {
         setUserInfo({ ...userInfo, image: response.data.image });
         toast.success("Profile Image Updated");
@@ -105,9 +103,7 @@ const Profile = () => {
 
   const handleDeleteImage = async () => {
     try {
-      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE, {
-        withCredentials: true,
-      });
+      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE);
       if (response.status === 200) {
         setUserInfo({ ...userInfo, image: null });
         toast.success("Image Removed Succeccfully.");
@@ -125,9 +121,14 @@ const Profile = () => {
       <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-deep-indigo/10 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="flex flex-col gap-10 w-[90vw] md:w-max glass-panel rounded-[2rem] p-10 z-10 relative">
-        <div onClick={handleNavigate} className="flex items-center gap-3 cursor-pointer group w-max">
+        <div
+          onClick={handleNavigate}
+          className="flex items-center gap-3 cursor-pointer group w-max"
+        >
           <IoArrowBack className="text-4xl text-neutral-400 group-hover:text-white transition-colors" />
-          <span className="text-neutral-400 group-hover:text-white font-medium transition-colors">Back</span>
+          <span className="text-neutral-400 group-hover:text-white font-medium transition-colors">
+            Back
+          </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
           <div
@@ -145,7 +146,7 @@ const Profile = () => {
               ) : (
                 <div
                   className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl flex items-center justify-center rounded-full ${getColor(
-                    selectedColor
+                    selectedColor,
                   )}`}
                 >
                   {firstName

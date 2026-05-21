@@ -5,7 +5,7 @@ import redis from "../redis/client.js";
 
 export const searchContacts = async (request, response, next) => {
   try {
-    const { searchTerm } = request.body;
+    const { searchTerm } = request.validated.body;
 
     // Escape special characters for regex
     const sanitizedSearchTerm = searchTerm.replace(

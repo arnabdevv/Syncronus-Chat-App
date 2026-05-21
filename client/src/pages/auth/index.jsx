@@ -55,9 +55,9 @@ const Auth = () => {
         const response = await apiClient.post(
           LOGIN_ROUTE,
           { email, password },
-          { withCredentials: true },
         );
         if (response.data.user.id) {
+          localStorage.setItem("token", response.data.token);
           setUserInfo(response.data.user);
           if (response.data.user.profileSetup) {
             navigate("/chat");
@@ -79,9 +79,9 @@ const Auth = () => {
         const response = await apiClient.post(
           SIGNUP_ROUTE,
           { email, password },
-          { withCredentials: true },
         );
         if (response.status === 201) {
+          localStorage.setItem("token", response.data.token);
           setUserInfo(response.data.user);
           navigate("/profile");
         }
