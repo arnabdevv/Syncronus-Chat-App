@@ -241,6 +241,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 👤 Author
 
-Built with ❤️ by **Your Name**
-- GitHub: [@your-username](https://github.com/your-username)
-- LinkedIn: [your-linkedin](https://linkedin.com/in/your-linkedin)
+Built with ❤️ by **Arnab Dinda**
+- GitHub: [@your-username](https://github.com/arnabdevv)
+- LinkedIn: [your-linkedin](https://linkedin.com/in/arnabdevv)
