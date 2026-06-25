@@ -116,7 +116,7 @@ export const updateProfile = async (request, response, next) => {
         colors: color,
         profileSetup: true,
       },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
 
     return response.status(200).json({
@@ -161,7 +161,7 @@ export const addProfileImage = async (request, response, next) => {
     const updateUser = await User.findByIdAndUpdate(
       request.userId,
       { image: fileName },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
 
     return response.status(200).json({

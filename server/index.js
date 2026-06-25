@@ -1,5 +1,5 @@
+import 'dotenv/config';
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/AuthRoutes.js";
@@ -8,7 +8,7 @@ import messagesRoutes from "./routes/MessagesRoutes.js";
 import { initSocket } from "./socket/index.js";
 import dns from "dns";
 
-dotenv.config(); // Load environment variables
+
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,7 +18,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 // CORS middleware configuration
 app.use(
   cors({
-    origin: process.env.ORIGIN, // Your frontend's origin (e.g., http://localhost:5173)
+    origin: true, // Your frontend's origin (e.g., http://localhost:5173)
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),

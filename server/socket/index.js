@@ -20,7 +20,7 @@ export const getReceiverSocketId = (userId) => userSocketMap[userId];
 export const initSocket = (httpServer) => {
   ioInstance = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.ORIGIN,
+      origin: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
     },
@@ -79,7 +79,7 @@ export const initSocket = (httpServer) => {
               status: recipientSocketId ? "delivered" : "sent",
               deliveredAt: recipientSocketId ? new Date() : null,
             },
-            { new: true },
+            { returnDocument: "after" },
           );
         } else {
           // Text message — create fresh
