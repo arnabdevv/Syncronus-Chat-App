@@ -18,7 +18,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 // CORS middleware configuration
 app.use(
   cors({
-    origin: process.env.ORIGIN, // Your frontend's origin (e.g., http://localhost:5173)
+    origin: true, // Your frontend's origin (e.g., http://localhost:5173)
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
