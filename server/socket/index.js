@@ -79,7 +79,7 @@ export const initSocket = (httpServer) => {
               status: recipientSocketId ? "delivered" : "sent",
               deliveredAt: recipientSocketId ? new Date() : null,
             },
-            { new: true },
+            { returnDocument: "after" },
           );
         } else {
           // Text message — create fresh
