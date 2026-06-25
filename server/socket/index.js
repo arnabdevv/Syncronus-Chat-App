@@ -20,7 +20,7 @@ export const getReceiverSocketId = (userId) => userSocketMap[userId];
 export const initSocket = (httpServer) => {
   ioInstance = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.ORIGIN,
+      origin: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
     },
